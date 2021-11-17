@@ -17,6 +17,7 @@ export interface RoutingModule {
   parentModulePath: string | null;
   lazy: boolean;
   redirectTo?: string;
+  prerender?: () => Promise<Record<string, string>[]>;
 }
 
 export interface Connection {

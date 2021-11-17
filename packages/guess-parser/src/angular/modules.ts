@@ -77,6 +77,9 @@ export const collectRoutingModules = (
       if (r.redirectTo !== undefined) {
         routingModule.redirectTo = r.redirectTo;
       }
+      if (r.prerender !== undefined) {
+        routingModule.prerender = r.prerender;
+      }
       result.push(routingModule);
       existing.add(path);
     }

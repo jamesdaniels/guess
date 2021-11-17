@@ -104,6 +104,24 @@ const readRedirect = (
   return null;
 };
 
+const readPrerender = (
+  node: ts.ObjectLiteralExpression,
+  typeChecker: ts.TypeChecker
+): (() => Promise<Record<string,string>[]>) | null => {
+  const expr = getObjectProp(node, 'prerender');
+  if (!expr) {
+    return null;
+  }
+  const val = evaluate({
+    node: expr,
+    typeChecker
+  });
+  if (val.success) {
+    return val.value as () => Promise<Record<string,string>[]>;
+  }
+  return null;
+};
+
 export const readChildren = (
   node: ts.ObjectLiteralExpression,
 ): ts.NodeArray<ts.Node> | null => {
@@ -118,6 +136,7 @@ export interface Route {
   path: string;
   children: Route[];
   redirectTo?: string;
+  prerender?: () => Promise<Record<string, string>[]>;
 }
 
 export interface LazyRoute extends Route {
@@ -153,6 +172,11 @@ export const getRoute = (
   const redirectTo = readRedirect(node, program.getTypeChecker());
   if (redirectTo) {
     route.redirectTo = redirectTo;
+  }
+
+  const prerender = readPrerender(node, program.getTypeChecker());
+  if (prerender) {
+    route.prerender = prerender;
   }
 
   const loadChildren = readLoadChildren(node, program.getTypeChecker());
